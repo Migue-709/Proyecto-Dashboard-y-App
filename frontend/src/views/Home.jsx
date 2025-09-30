@@ -173,15 +173,8 @@ function LandingPage() {
 
                         {/* CTA/Botón Principal */}
                         <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mb-8">
-                            {/* W-full asegura que el botón principal ocupe todo el ancho en móvil */}
-                            <button className="w-full sm:w-auto px-8 py-3 bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:bg-sky-800 transition-colors duration-300 ease-in-out cursor-pointer">
-                                <a
-                                    href="frontend/public/MalwareScan_Instalador.zip"
-                                    download="MalwareScan_Instalador.zip"
-                                >
-                                    Descargar App
-                                </a>
-                            </button>
+                            {/* Botón de descarga robusto: usa la ruta correcta desde /public y verifica disponibilidad */}
+                            <DownloadInstallerButton />
                         </div>
 
                         {/* Secciones de Login/Registro */}
@@ -218,3 +211,38 @@ function LandingPage() {
 }
 
 export default LandingPage;
+
+// Componente separado para manejo más robusto de la descarga
+function DownloadInstallerButton() {
+    const installerPath = `${import.meta.env.BASE_URL}MalwareScan_Instalador.zip`;
+
+    const handleDownload = async () => {
+        try {
+            // Verificar que el recurso existe con una petición HEAD (rápida)
+            const head = await fetch(installerPath, { method: 'HEAD' });
+            if (!head.ok) {
+                alert('No se pudo localizar el instalador (HTTP ' + head.status + ').');
+                return;
+            }
+            // Forzar descarga creando un enlace temporal para evitar que el navegador trate el recurso distinto
+            const a = document.createElement('a');
+            a.href = installerPath;
+            a.download = 'MalwareScan_Instalador.zip';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (e) {
+            console.error('Error al iniciar la descarga:', e);
+            alert('Ocurrió un error al iniciar la descarga. Revisa la consola.');
+        }
+    };
+
+    return (
+        <button
+            onClick={handleDownload}
+            className="w-full sm:w-auto px-8 py-3 bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:bg-sky-800 transition-colors duration-300 ease-in-out cursor-pointer"
+        >
+            Descargar App
+        </button>
+    );
+}

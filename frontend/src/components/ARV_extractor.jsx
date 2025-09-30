@@ -1,4 +1,8 @@
 import { useState } from 'react';
+// Helpers para búsquedas seguras y eficientes
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+}
 // Objeto que mapea nombres de herramientas a sus componentes
 const componentMap = {
   'Extractor de Strings': StringExtractor,
@@ -149,6 +153,7 @@ function FromHexConverter({ file }) {
   const [error, setError] = useState(null);
   const [searchSequence, setSearchSequence] = useState('');
   const [highlightedData, setHighlightedData] = useState(null);
+  const [searchInfo, setSearchInfo] = useState(null);
 
   const handleDecodeHex = async () => {
     if (!file) {
@@ -197,25 +202,45 @@ function FromHexConverter({ file }) {
   const handleSearch = () => {
     if (!decodedData || !searchSequence) {
       setHighlightedData(null);
+      setSearchInfo(null);
       return;
     }
-    // Crear un array de elementos de texto y spans resaltados
-    const parts = [];
-    let lastIndex = 0;
-    const searchRegex = new RegExp(searchSequence, 'gi');
-    let match;
-
-    while ((match = searchRegex.exec(decodedData)) !== null) {
-      parts.push(decodedData.substring(lastIndex, match.index));
-      parts.push(
-        <span key={match.index} className="bg-yellow-300 dark:bg-yellow-600 text-black">
-          {match[0]}
-        </span>
-      );
-      lastIndex = match.index + match[0].length;
+    const needle = searchSequence;
+    const hay = decodedData;
+    const maxHighlights = 2000;
+    const largeThreshold = 400000; // caracteres
+    let parts = [];
+    let last = 0;
+    let count = 0;
+    let lcNeedle = needle.toLowerCase();
+    let lcHay = hay.toLowerCase();
+    if (hay.length > largeThreshold) {
+      // Búsqueda iterativa sin regex para evitar overhead
+      let idx = lcHay.indexOf(lcNeedle);
+      while (idx !== -1 && count < maxHighlights) {
+        parts.push(hay.slice(last, idx));
+        parts.push(<span key={idx} className="bg-yellow-300 dark:bg-yellow-600 text-black">{hay.slice(idx, idx + needle.length)}</span>);
+        last = idx + needle.length;
+        count++;
+        idx = lcHay.indexOf(lcNeedle, last);
+      }
+      parts.push(hay.slice(last));
+      setHighlightedData(parts);
+      setSearchInfo(count >= maxHighlights ? `Se detuvo el resaltado tras ${maxHighlights} coincidencias (resultado truncado).` : `Coincidencias: ${count}`);
+      return;
     }
-    parts.push(decodedData.substring(lastIndex));
+    // Texto manejable: usar regex escapado para coincidencias completas (case-insensitive)
+    const regex = new RegExp(escapeRegExp(needle), 'gi');
+    let m;
+    while ((m = regex.exec(hay)) !== null && count < maxHighlights) {
+      parts.push(hay.slice(last, m.index));
+      parts.push(<span key={m.index} className="bg-yellow-300 dark:bg-yellow-600 text-black">{m[0]}</span>);
+      last = m.index + m[0].length;
+      count++;
+    }
+    parts.push(hay.slice(last));
     setHighlightedData(parts);
+    setSearchInfo(count >= maxHighlights ? `Se detuvo el resaltado tras ${maxHighlights} coincidencias (resultado truncado).` : `Coincidencias: ${count}`);
   };
 
   return (
@@ -267,6 +292,7 @@ function FromHexConverter({ file }) {
       {decodedData && (
         <div className="mt-4 p-4 bg-gray-100 dark:bg-slate-800 rounded-md overflow-y-auto flex-grow">
           <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2">Datos Decodificados:</h3>
+          {searchInfo && <div className="text-xs mb-2 text-gray-500 dark:text-gray-400">{searchInfo}</div>}
           <pre className="font-mono whitespace-pre-wrap break-all text-sm text-gray-600 dark:text-gray-300">
             {highlightedData || decodedData}
           </pre>
@@ -283,6 +309,7 @@ function ToHexConverter({ file }) {
   const [error, setError] = useState(null);
   const [searchSequence, setSearchSequence] = useState('');
   const [highlightedData, setHighlightedData] = useState(null);
+  const [searchInfo, setSearchInfo] = useState(null);
 
   const handleConvertToHex = async () => {
     if (!file) {
@@ -328,42 +355,46 @@ function ToHexConverter({ file }) {
   const handleSearch = () => {
     if (!hexData || !searchSequence) {
       setHighlightedData(null);
+      setSearchInfo(null);
       return;
+    }
+    const cleanHexData = hexData.replace(/\s/g, '').toLowerCase();
+    const target = searchSequence.replace(/\s/g, '').toLowerCase();
+
+    if (!/^[0-9a-fA-F]+$/.test(target) || target.length % 2 !== 0) {
+      setError("La secuencia de búsqueda no es un hexadecimal válido (debe tener longitud par y dígitos hex).");
+      setHighlightedData(null);
+      setSearchInfo(null);
+      return;
+    }
+
+    // Precomputar mapa de índices entre la cadena sin espacios y la original
+    const map = []; // map[posEnClean] = indiceEnOriginal
+    for (let i = 0, j = 0; i < hexData.length; i++) {
+      const c = hexData[i];
+      if (c !== ' ') {
+        map[j] = i;
+        j++;
+      }
     }
     const parts = [];
-    let lastIndex = 0;
-    // Reemplazar espacios y convertir a minúsculas para buscar
-    const cleanHexData = hexData.replace(/\s/g, '').toLowerCase();
-    const cleanSearchSequence = searchSequence.replace(/\s/g, '').toLowerCase();
-
-    // Validar si la secuencia de búsqueda es una cadena hexadecimal válida
-    if (!/^[0-9a-fA-F]+$/.test(cleanSearchSequence) || cleanSearchSequence.length % 2 !== 0) {
-      setError("La secuencia de búsqueda no es un hexadecimal válido (debe ser par y contener solo dígitos hexadecimales).");
-      setHighlightedData(null);
-      return;
+    let lastOriginal = 0;
+    let count = 0;
+    const maxHighlights = 2000;
+    let idx = cleanHexData.indexOf(target);
+    while (idx !== -1 && count < maxHighlights) {
+      const end = idx + target.length; // índices en clean
+      const originalStart = map[idx];
+      const originalEnd = map[end - 1] + 2; // +1 para incluir último char, +1 para que substring sea exclusivo
+      parts.push(hexData.slice(lastOriginal, originalStart));
+      parts.push(<span key={originalStart} className="bg-yellow-300 dark:bg-yellow-600 text-black">{hexData.slice(originalStart, originalEnd)}</span>);
+      lastOriginal = originalEnd;
+      count++;
+      idx = cleanHexData.indexOf(target, end);
     }
-
-    const searchRegex = new RegExp(cleanSearchSequence, 'gi');
-    let match;
-
-    while ((match = searchRegex.exec(cleanHexData)) !== null) {
-      const startIndex = match.index;
-      const endIndex = startIndex + match[0].length;
-
-      // Convertir índices de la cadena limpia a la cadena original con espacios
-      const startOriginal = hexData.replace(/\s/g, '').substring(0, startIndex).length * 2 + (startIndex > 0 ? startIndex / 2 : 0);
-      const endOriginal = hexData.replace(/\s/g, '').substring(0, endIndex).length * 2 + (endIndex > 0 ? endIndex / 2 : 0);
-
-      parts.push(hexData.substring(lastIndex, startOriginal));
-      parts.push(
-        <span key={startOriginal} className="bg-yellow-300 dark:bg-yellow-600 text-black">
-          {hexData.substring(startOriginal, endOriginal)}
-        </span>
-      );
-      lastIndex = endOriginal;
-    }
-    parts.push(hexData.substring(lastIndex));
+    parts.push(hexData.slice(lastOriginal));
     setHighlightedData(parts);
+    setSearchInfo(count >= maxHighlights ? `Se detuvo tras ${maxHighlights} coincidencias (truncado).` : `Coincidencias: ${count}`);
   };
 
   return (
@@ -415,6 +446,7 @@ function ToHexConverter({ file }) {
       {hexData && (
         <div className="mt-4 p-4 bg-gray-100 dark:bg-slate-800 rounded-md overflow-y-auto flex-grow">
           <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2">Datos en Hexadecimal:</h3>
+          {searchInfo && <div className="text-xs mb-2 text-gray-500 dark:text-gray-400">{searchInfo}</div>}
           <pre className="font-mono whitespace-pre-wrap break-all text-sm text-gray-600 dark:text-gray-300">
             {highlightedData || hexData}
           </pre>
