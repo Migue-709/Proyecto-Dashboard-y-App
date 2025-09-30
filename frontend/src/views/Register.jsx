@@ -75,10 +75,13 @@ const Register = () => {
             if (!response.ok) {
                 setError(data.error || 'Error al registrar usuario. Inténtalo de nuevo.');
                 return;
-            } else {
-                handleResendEmail()
             }
+            // El backend ya envía el correo de verificación en /api/register.
+            // Antes aquí se llamaba a handleResendEmail(), provocando un segundo correo
+            // y anulando el token anterior. Se elimina para evitar duplicados.
             setConfirmationSent(true);
+            // Opcional: mostrar mensaje reutilizando el mismo componente visual
+            setShowMsgEmail(true);
         } catch (err) {
             setIsLoading(false);
             setError('Error de conexión con el servidor. Verifica tu conexión.');
