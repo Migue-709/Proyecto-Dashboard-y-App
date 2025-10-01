@@ -126,6 +126,10 @@ function Dashboard({ setUser }) {
         );
 
         console.log("Análisis QuickSand completado:", response.data);
+        const a =  response.data.analysis_results?.results
+        const risk = response.data.analysis_results?.risk
+        console.log('RESULTADO DE RESULTS',a)
+        console.log('ESTADO DE QUICKSAND:', risk)
       } catch (error) {
         if (error.response) {
           console.error("Error en la API de QuickSand:", error.response.data);
