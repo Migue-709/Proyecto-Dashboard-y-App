@@ -254,10 +254,10 @@ app.get('/api/history/:user_id', async (req, res) => {
   }
 });
 
-app.delete('api/files/:file_id', async (req, res) => {
+app.delete('/api/files/:file_id', async (req, res) => {
+  console.log('DELETE /api/files/:file_id')
   const { file_id } = req.params;
   try {
-    console.log('hello')
     await pool.query('DELETE FROM file WHERE file_id = $1', [file_id]);
     res.json({ success: true });
   } catch (err) {

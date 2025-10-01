@@ -439,7 +439,7 @@ function Dashboard({ setUser }) {
         )}
         {/* --- Contenido Principal Condicional --- */}
   <div id="content" className="w-screen md:w-full md:col-span-6 flex flex-col gap-6 p-6 flex-1 overflow-y-auto transition-all duration-300 ease-in-out">
-
+    
           {/* --- Barra superior --- */}
           <div className="bg-white dark:bg-slate-950 rounded-xl shadow-sm p-4 flex items-center justify-between border border-gray-200 dark:border-slate-800">
             <div className="flex items-center gap-4">
@@ -563,6 +563,7 @@ function Dashboard({ setUser }) {
           {selectNavbar == 0 && <Scan file={file} maliciousCount={maliciousCount} totalAnalyzers={totalAnalyzers} analysisResult={analysisResult} isScanning={isScanning} scanFile={scanFile} handleEmptyFile={handleEmptyFile}></Scan>}
           {selectNavbar == 1 && <ARV_extractor file={file} />}
           {selectNavbar == 2 && <History />}
+
         </div>
       </div>
       {

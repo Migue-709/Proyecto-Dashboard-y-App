@@ -1,3 +1,4 @@
+import Gemini from "./Gemini";
 function Scan({ file, maliciousCount, analysisResult, isScanning }) {
   return (
     <div className="flex flex-col gap-6  h-full">
@@ -6,6 +7,7 @@ function Scan({ file, maliciousCount, analysisResult, isScanning }) {
       <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm flex flex-col border border-gray-200 dark:border-slate-800 overflow-hidden flex-grow">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Resultados del análisis</h3>
+            <Gemini></Gemini>
           {analysisResult && (
             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${maliciousCount > 0
               ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
