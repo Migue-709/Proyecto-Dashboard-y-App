@@ -254,6 +254,18 @@ app.get('/api/history/:user_id', async (req, res) => {
   }
 });
 
+app.delete('api/files/:file_id', async (req, res) => {
+  const { file_id } = req.params;
+  try {
+    console.log('hello')
+    await pool.query('DELETE FROM file WHERE file_id = $1', [file_id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error DELETE /api/files/:file_id', err.message);
+    res.status(500).json({ error: 'Error al eliminar archivo.' });
+  }
+})
+
 app.listen(3001, () => {
   console.log('Servidor backend en http://localhost:3001');
 });

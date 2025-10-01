@@ -1,7 +1,8 @@
 // History.jsx
 import {useState, useEffect} from 'react';
 import axios from 'axios';
-
+import { TrashIcon } from '@heroicons/react/24/solid'
+import { DocumentArrowDownIcon } from '@heroicons/react/24/solid'
 function getStoredUser() {
   try {
     const user = localStorage.getItem('user');
@@ -82,6 +83,23 @@ const History = () => {
       setDownloadingId(null);
     }
   }
+  async function handlDeleteFile(row){
+    if(!row.file_id){
+      return;
+    }
+    try{
+      setIsLoading(true);
+      console.log('intento', row.file_id);
+      await axios.delete(`http://localhost:3001/api/files/${row.file_id}`);
+      // Refrescar historial
+      const userHistory = await getUserHistory();
+      setHistory(userHistory);
+    }catch(err){
+      alert('Error al eliminar el archivo. Intente nuevamente.');
+    }finally{
+      setIsLoading(false);
+    }
+  }
 
   const filteredHistory = history.filter(h => !filter || h.file_name?.toLowerCase().includes(filter.toLowerCase()));
   return (
@@ -120,10 +138,10 @@ const History = () => {
                   Detecciones
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Reporte
+                  Fecha y Hora
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Fecha y Hora
+                  Opciones
                 </th>
               </tr>
             </thead>
@@ -152,17 +170,12 @@ const History = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                       {typeof item.vt_score === 'number' ? item.vt_score : '0'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {item.scan_report ? (
-                        <button onClick={()=>handleDownloadReport(item)} disabled={downloadingId===item.scan_id} className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50">
-                          {downloadingId===item.scan_id ? 'Descargando...' : 'Descargar'}
-                        </button>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {formatDate(item.scan_timestamp || item.uploaded_at)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <TrashIcon onClick={()=>handlDeleteFile(item)} className='size-4 cursor-pointer hover:text-red-700 transition-color duration-300 ease-in-out' title='eliminar'/>
+                      {item.scan_report ? <DocumentArrowDownIcon className='size-4 cursor-pointer hover:text-blue-700 transition-color duration-300 ease-in-out' title={downloadingId===item.scan_id ? 'Descargando...' : 'Descargar'} onClick={()=>handleDownloadReport(item)} disabled={downloadingId===item.scan_id}/> : <span className="text-gray-400">—</span>}  
                     </td>
                   </tr>
                 );
