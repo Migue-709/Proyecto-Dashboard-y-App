@@ -16,6 +16,7 @@ import gsap from "gsap";
 const DELAY_MS = 3000;
 // Añadido: base de la API y utilidades de hashing/polling
 const API_BASE = 'https://www.virustotal.com/api/v3';
+const API_QUICKSAND_BASE = 'http://127.0.0.1:8001'
 
 async function computeSHA256(file) {
   const buffer = await file.arrayBuffer();
@@ -82,10 +83,10 @@ function Dashboard({ setUser }) {
     state: false,
   })
   const [selectNavbar, setSelectNavbar] = useState(0);
-  const [options,setOptions] = useState(
-    [{title:'Escaner Archivo', icon:<svg className="size-6 text-slate-900 dark:text-slate-50 font-bold hover:text-purple-500 transition-all duration-300 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" data-slot="icon" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.3v-2.7a3.4 3.4 0 0 0-3.4-3.3h-1.5A1.1 1.1 0 0 1 13.5 7V5.6a3.4 3.4 0 0 0-3.4-3.3H8.3m2.2 0H5.6c-.6 0-1.1.5-1.1 1v17.3c0 .6.5 1.1 1.1 1.1h12.8c.6 0 1.1-.5 1.1-1v-9.4a9 9 0 0 0-9-9Z"/></svg>},
-    {title:'Extractor de String', icon:<svg className="size-6 text-slate-900 dark:text-slate-50 font-bold hover:text-purple-500 transition-all duration-300 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" data-slot="icon" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m15 11.3 1.5 1.4.8-.7V8.8l2.2-.7A3 3 0 1 0 16 4.5l-.7 2.3H12l-.8.7L12.8 9m2.2 2.3-8.5 8.4c-.3.4-.8.5-1.3.5s-.9.2-1.2.6l-1 1-.8-.8 1-1c.4-.3.5-.8.5-1.2s.2-1 .6-1.3L12.7 9m2.3 2.3L12.7 9"/></svg>},
-    {title:'Historial', icon:<svg className="size-6 text-slate-900 dark:text-slate-50 font-bold hover:text-purple-500 transition-all duration-300 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" data-slot="icon" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.1c0-.6.5-1.1 1.1-1.1h2.3c.6 0 1.1.5 1.1 1.1V20c0 .6-.5 1.1-1.1 1.1H4A1.1 1.1 0 0 1 3 19.9V13Zm6.8-4.5c0-.6.5-1.1 1-1.1h2.3c.6 0 1.2.5 1.2 1.1V20c0 .6-.6 1.1-1.2 1.1H11a1.1 1.1 0 0 1-1.2-1.1V8.6Zm6.7-4.5c0-.6.5-1.1 1.1-1.1H20c.6 0 1.1.5 1.1 1.1V20c0 .6-.5 1.1-1.1 1.1h-2.3a1.1 1.1 0 0 1-1.1-1.1V4Z"/></svg>}
+  const [options, setOptions] = useState(
+    [{ title: 'Escaner Archivo', icon: <svg className="size-6 text-slate-900 dark:text-slate-50 font-bold hover:text-purple-500 transition-all duration-300 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" data-slot="icon" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.3v-2.7a3.4 3.4 0 0 0-3.4-3.3h-1.5A1.1 1.1 0 0 1 13.5 7V5.6a3.4 3.4 0 0 0-3.4-3.3H8.3m2.2 0H5.6c-.6 0-1.1.5-1.1 1v17.3c0 .6.5 1.1 1.1 1.1h12.8c.6 0 1.1-.5 1.1-1v-9.4a9 9 0 0 0-9-9Z" /></svg> },
+    { title: 'Extractor de String', icon: <svg className="size-6 text-slate-900 dark:text-slate-50 font-bold hover:text-purple-500 transition-all duration-300 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" data-slot="icon" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="m15 11.3 1.5 1.4.8-.7V8.8l2.2-.7A3 3 0 1 0 16 4.5l-.7 2.3H12l-.8.7L12.8 9m2.2 2.3-8.5 8.4c-.3.4-.8.5-1.3.5s-.9.2-1.2.6l-1 1-.8-.8 1-1c.4-.3.5-.8.5-1.2s.2-1 .6-1.3L12.7 9m2.3 2.3L12.7 9" /></svg> },
+    { title: 'Historial', icon: <svg className="size-6 text-slate-900 dark:text-slate-50 font-bold hover:text-purple-500 transition-all duration-300 ease-in-out" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" data-slot="icon" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.1c0-.6.5-1.1 1.1-1.1h2.3c.6 0 1.1.5 1.1 1.1V20c0 .6-.5 1.1-1.1 1.1H4A1.1 1.1 0 0 1 3 19.9V13Zm6.8-4.5c0-.6.5-1.1 1-1.1h2.3c.6 0 1.2.5 1.2 1.1V20c0 .6-.6 1.1-1.2 1.1H11a1.1 1.1 0 0 1-1.2-1.1V8.6Zm6.7-4.5c0-.6.5-1.1 1.1-1.1H20c.6 0 1.1.5 1.1 1.1V20c0 .6-.5 1.1-1.1 1.1h-2.3a1.1 1.1 0 0 1-1.1-1.1V4Z" /></svg> }
     ]
   )
   const sidebarRef = useRef(null)
@@ -106,6 +107,33 @@ function Dashboard({ setUser }) {
     setAnalysisResult(null);
 
     try {
+      ///START ANALYZE QUICKSAND
+      try {
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+        const response = await axios.post(
+          `${API_QUICKSAND_BASE}/api/quicksand-analyze`,
+          formData,
+          {
+            // 3. Cabecera para indicar el tipo de contenido de la solicitud.
+            //    **¡OJO!** Al usar FormData, DEBES omitir el 'Content-Type'. 
+            //    Axios/el navegador lo establecerán automáticamente a 'multipart/form-data' 
+            //    y añadirán el 'boundary' (límite) necesario para que la API lo interprete correctamente.
+            headers: {
+              // 'Content-Type': 'multipart/form-data', // <-- ¡NO LO PONGAS!
+            }
+          }
+        );
+
+        console.log("Análisis QuickSand completado:", response.data);
+      } catch (error) {
+        if (error.response) {
+          console.error("Error en la API de QuickSand:", error.response.data);
+        } else {
+          console.error("Error de red/petición:", error.message);
+        }
+      }
+      ///END ANALYZE QUICKSAND
       // 1) Intentar obtener reporte existente por hash (rápido si ya fue analizado)
       const sha256 = await computeSHA256(file);
       try {
@@ -201,7 +229,7 @@ function Dashboard({ setUser }) {
         file_type: file.type,
         file_hash: fileHash,
       };
-      
+
       const response = await fetch('http://localhost:3001/api/files', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -218,12 +246,12 @@ function Dashboard({ setUser }) {
       console.error('Ocurrió un error inesperado file:', error);
     }
     try {
-      
+
       const enginesArray = lastResults ? Object.values(lastResults) : [];
       const vt_score = enginesArray.filter(r => r.category === 'malicious').length;
-      
+
       const raw_total_analyzers = lastResults ? Object.keys(lastResults).length : 0;
-      const effective_analyzers = enginesArray.filter(r => !['type-unsupported','timeout','failure','error'].includes(r.category)).length;
+      const effective_analyzers = enginesArray.filter(r => !['type-unsupported', 'timeout', 'failure', 'error'].includes(r.category)).length;
       const maliciousEngines = enginesArray
         .filter(r => r.category === 'malicious')
         .map(r => ({ engine_name: r.engine_name, result: r.result, category: r.category }));
@@ -246,9 +274,9 @@ function Dashboard({ setUser }) {
           meaningful_name: attrs?.meaningful_name || null,
         },
         analysis: {
-          vt_score, 
+          vt_score,
           total_analyzers: raw_total_analyzers,
-            effective_analyzers,
+          effective_analyzers,
           state: estado,
           last_analysis_stats: attrs?.last_analysis_stats || null,
           last_analysis_results: lastResults || null,
@@ -338,8 +366,8 @@ function Dashboard({ setUser }) {
     ? Object.values(analysisResult).filter(r => r.category === 'malicious')
     : [];
   const totalAnalyzers = analysisResult ? Object.keys(analysisResult).length : 0;
-  function handleMsgError(){
-    setMsgError(!msgError)    
+  function handleMsgError() {
+    setMsgError(!msgError)
   }
   useEffect(() => {
     // Asegúrate de que la referencia exista
@@ -438,8 +466,8 @@ function Dashboard({ setUser }) {
           </div>
         )}
         {/* --- Contenido Principal Condicional --- */}
-  <div id="content" className="w-screen md:w-full md:col-span-6 flex flex-col gap-6 p-6 flex-1 overflow-y-auto transition-all duration-300 ease-in-out">
-    
+        <div id="content" className="w-screen md:w-full md:col-span-6 flex flex-col gap-6 p-6 flex-1 overflow-y-auto transition-all duration-300 ease-in-out">
+
           {/* --- Barra superior --- */}
           <div className="bg-white dark:bg-slate-950 rounded-xl shadow-sm p-4 flex items-center justify-between border border-gray-200 dark:border-slate-800">
             <div className="flex items-center gap-4">
