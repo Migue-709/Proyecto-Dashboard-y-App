@@ -1,7 +1,7 @@
 import Gemini from "./Gemini";
 function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
   return (
-    <div className="flex flex-col gap-6  h-full">
+    <div className="flex flex-col gap-6  h-full max-h-screen">
       {/* Sección de Resultados (Placeholder) */}
       {/* Este div permanece igual, ya que muestra los resultados detallados */}
       <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm flex flex-col border border-gray-200 dark:border-slate-800 overflow-hidden flex-grow">
@@ -47,12 +47,12 @@ function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
           </div>
 
         ) : (
-          <div className="overflow-hidden flex flex-col ma-h-full  md:max-h-[300px] lg:max-h-[350px]">
-            <div className="overflow-y-auto flex-grow">
+          <div className="overflow-hidden flex flex-col ma-h-full  md:max-h-[250px]">
+            <div className="flex-grow">
               <Quicksand state={quicksand.state} results={Object.keys(quicksand.results)}/>
 
-
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+<div className="overflow-x-auto border border-gray-200 dark:border-slate-800 rounded-lg shadow-md max-h-80">
+              <table className=" min-w-full divide-y divide-gray-200 dark:divide-slate-800">
                 <caption className="px-4 py-2  text-lg font-semibold text-gray-900 dark:text-gray-100 uppercase w-full text-center">
                   RESULTADO DE VIRUSTOTAL
                 </caption>
@@ -72,7 +72,7 @@ function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-950 divide-y divide-gray-200 dark:divide-slate-800">
+                <tbody className=" bg-white dark:bg-slate-950 divide-y divide-gray-200 dark:divide-slate-800">
                   {Object.keys(analysisResult).map((engineKey) => {
                     const engine = analysisResult[engineKey];
                     return (
@@ -101,6 +101,7 @@ function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}
