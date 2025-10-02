@@ -91,6 +91,7 @@ function Dashboard({ setUser }) {
     ]
   )
   const sidebarRef = useRef(null)
+  const wrapperSidebar = useRef(null)
   const activeScanId = useRef(0); // invalidar resultados de scans previos
   const navigate = useNavigate();
   const handleFileChange = (e) => {
@@ -409,6 +410,10 @@ function Dashboard({ setUser }) {
 
     // Usa GSAP.set() para establecer el estado inicial sin animación si estamos en móvil
     if (window.innerWidth < 768) {
+      gsap.set(wrapperSidebar.current, {
+        left: '-100vw',
+        opacity: 0,
+      });
       gsap.set(sidebarRef.current, {
         left: '-100vw',
         opacity: 0,
@@ -418,14 +423,26 @@ function Dashboard({ setUser }) {
     // Luego, maneja la animación de apertura y cierre
     if (isMobileMenuOpen && window.innerWidth < 768) {
       // Animación de entrada
-      gsap.to(sidebarRef.current, {
+        gsap.to(wrapperSidebar.current, {
         left: 0,
         opacity: 1,
         duration: 0.7,
         ease: "power2.out",
       });
+      gsap.to(sidebarRef.current, {
+        left: 0,
+        opacity: 1,
+        duration: 0.7,
+        z:10,
+        ease: "power2.out",
+      });
     } else if (!isMobileMenuOpen && window.innerWidth < 768) {
       // Animación de salida
+      gsap.to(wrapperSidebar.current, {
+        left: '-100vw',
+        duration: 0.7,
+        ease: "power2.in",
+      });
       gsap.to(sidebarRef.current, {
         left: '-100vw',
         opacity: 0,
@@ -448,12 +465,13 @@ function Dashboard({ setUser }) {
     <div className="App w-screen min-h-screen bg-slate-100 dark:bg-slate-900 overflow-x-hidden font-ubuntu">
       <div className="w-full md:max-h-screen grid md:grid-cols-7 min-h-full">
         {/* --- Sidebar Desktop --- */}
+        <div ref={wrapperSidebar} className="md:col-span-1 left-[100vw] md:left-0 fixed md:static h-[100vh] z-20 md:z-10">
         <div
           ref={sidebarRef}
           className="
             md:col-span-1
             bg-white dark:bg-slate-950 flex flex-col items-center justify-between p-6 shadow-xl  border-gray-200 dark:border-slate-800
-             w-2/3 md:w-full fixed left-[-100vw] md:static transition-all duration-300 ease-in-out h-screen z-20 md:z-0 border-r
+             w-2/3 md:w-60 fixed left-[-100vw] md:left-0 transition-all duration-300 ease-in-out h-screen z-30 md:z-0 border-r
           "
         >
           <header className="flex flex-col items-center justify-center gap-2 mb-8">
@@ -489,6 +507,7 @@ function Dashboard({ setUser }) {
               </button>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Overlay oscuro para el móvil */}
