@@ -3,11 +3,52 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-ubuntu:'Ubuntu', sans-serif;
+  --font-ubuntu: "Ubuntu", sans-serif;
 }
 
 @font-face {
-    font-family: 'Ubuntu', sans-serif;
-    src: url(../public/Ubuntu/Ubuntu-Regular.ttf) format('truetype');
-    font-weight: auto;
+  font-family: "Ubuntu", sans-serif;
+  src: url(../public/Ubuntu/Ubuntu-Regular.ttf) format("truetype");
+  font-weight: auto;
+}
+
+/* Scrollbar estilizada (ligera) para paneles de resultados */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #6366f1 #1e293b; /* thumb color, track color */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0f172a; /* slate-900 */
+  border-radius: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1, #4f46e5); /* indigo gradient */
+  border-radius: 6px;
+  border: 2px solid #0f172a; /* creates space */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #818cf8, #6366f1);
+}
+
+/* Claro (cuando body no tiene .dark) */
+body:not(.dark) .custom-scrollbar {
+  scrollbar-color: #6366f1 #e2e8f0; /* thumb, track */
+}
+body:not(.dark) .custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9; /* slate-100 */
+}
+body:not(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1, #4f46e5);
+  border: 2px solid #f1f5f9;
+}
+body:not(.dark) .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #818cf8, #6366f1);
 }

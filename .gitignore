@@ -1,4 +1,51 @@
-# Logs
+### Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+### Virtual environments
+.venv/
+venv/
+env/
+
+### Build / distribution artifacts
+build/
+dist/
+*.egg-info/
+
+### Logs & temp
+*.log
+*.tmp
+*.temp
+
+### OS / Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+
+### Node / frontend
+node_modules/
+pnpm-debug.log*
+*.tsbuildinfo
+dist-ssr/
+
+### Env / secrets
+.env
+.env.*
+!.env.example
+
+### Coverage / testing
+coverage/
+.pytest_cache/
+
+### Misc
+*.swp
+*.swo
+*.orig
+
+# Keep PyInstaller spec files (used in repo) so do NOT ignore *.spec
+# If you later want to ignore, uncomment the next line
+# *.spec# Logs
 logs
 *.log
 npm-debug.log*

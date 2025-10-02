@@ -125,14 +125,17 @@ function Dashboard({ setUser }) {
             }
           }
         );
-        const state = response.data.analysis_results?.risk
-        const results = response.data.analysis_results?.results
-        console.log(state, results)
+        const qsPayload = response.data.analysis_results || {}
+        const state = qsPayload.risk
+        const results = qsPayload.results
+        console.log('QUICKSAND RAW:', qsPayload)
         setQuicksand({
-          state: response.data.analysis_results?.risk,
-          results: response.data.analysis_results?.results
+          state: state,
+          results: results,
+          score: qsPayload.score,
+          tags: qsPayload.tags
         });
-        console.log('ESTATUS DE QUICKSAND: ', state, "RESULTADOS:", results)
+        console.log('ESTATUS DE QUICKSAND: ', state, 'SCORE:', qsPayload.score, 'TAGS:', qsPayload.tags, 'RESULTADOS:', results)
       } catch (error) {
         if (error.response) {
           console.error("Error en la API de QuickSand:", error.response.data);

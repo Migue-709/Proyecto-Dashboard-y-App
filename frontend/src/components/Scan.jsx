@@ -1,5 +1,10 @@
 import Gemini from "./Gemini";
+import { useState } from 'react';
+
 function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
+  // Estados para colapsar/expandir
+  const [showQS, setShowQS] = useState(true);
+  const [showVT, setShowVT] = useState(true);
   return (
     <div className="flex flex-col gap-6  h-full max-h-screen">
       {/* Sección de Resultados (Placeholder) */}
@@ -47,62 +52,74 @@ function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
           </div>
 
         ) : (
-          <div className="overflow-hidden flex flex-col ma-h-full  md:max-h-[250px]">
-            <div className="flex-grow">
-              {/* Pasar el objeto completo de resultados de QuickSand (no solo sus keys) */}
-              <Quicksand state={quicksand.state} results={quicksand.results} />
-
-<div className="overflow-x-auto border border-gray-200 dark:border-slate-800 rounded-lg shadow-md max-h-80">
-              <table className=" min-w-full divide-y divide-gray-200 dark:divide-slate-800">
-                <caption className="px-4 py-2  text-lg font-semibold text-gray-900 dark:text-gray-100 uppercase w-full text-center">
-                  RESULTADO DE VIRUSTOTAL
-                </caption>
-                <thead className="bg-gray-50 dark:bg-slate-900 sticky top-0">
-                  <tr>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Motor
-                    </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Resultado
-                    </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Categoría
-                    </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Actualización
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className=" bg-white dark:bg-slate-950 divide-y divide-gray-200 dark:divide-slate-800">
-                  {Object.keys(analysisResult).map((engineKey) => {
-                    const engine = analysisResult[engineKey];
-                    return (
-                      <tr key={engine.engine_name} className="hover:bg-gray-50 dark:hover:bg-slate-900">
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {engine.engine_name}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                          {engine.result || 'N/A'}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm">
-                          <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                  ${engine.category === 'malicious' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
-                              engine.category === 'undetected' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-                                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                            }`}
-                          >
-                            {engine.category}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {engine.engine_update}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          <div className="flex flex-col gap-6">
+            {/* Panel QuickSand */}
+            <div className="border border-gray-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 shadow-sm">
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 uppercase w-full text-center">RESULTADO DE QUICKSAND</span>
+                <button
+                  type="button"
+                  onClick={() => setShowQS(!showQS)}
+                  className="ml-4 inline-flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
+                  aria-label="Toggle QuickSand"
+                >
+                  <svg className={`h-5 w-5 transform transition-transform ${showQS ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
+                </button>
               </div>
+              {showQS && (
+                <div className="p-4 border-t border-gray-200 dark:border-slate-800 overflow-x-auto max-h-80 overflow-y-auto custom-scrollbar">
+                  <Quicksand state={quicksand.state} results={quicksand.results} />
+                </div>
+              )}
+            </div>
+
+            {/* Panel VirusTotal (estilo restaurado) */}
+            <div className="border border-gray-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-950 shadow-sm">
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-lg font-semibold text-gray-900 dark:text-gray-100 uppercase w-full text-center">RESULTADO DE VIRUSTOTAL</span>
+                <button
+                  type="button"
+                  onClick={() => setShowVT(!showVT)}
+                  className="ml-4 inline-flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
+                  aria-label="Toggle VirusTotal"
+                >
+                  <svg className={`h-5 w-5 transform transition-transform ${showVT ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
+                </button>
+              </div>
+              {showVT && (
+                <div className="overflow-x-auto border-t border-gray-200 dark:border-slate-800 rounded-b-lg max-h-80 custom-scrollbar">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+                    <thead className="bg-gray-50 dark:bg-slate-900">
+                      <tr>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Motor</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Resultado</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categoría</th>
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actualización</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-950 divide-y divide-gray-200 dark:divide-slate-800">
+                      {Object.keys(analysisResult).map((engineKey) => {
+                        const engine = analysisResult[engineKey];
+                        return (
+                          <tr key={engine.engine_name} className="hover:bg-gray-50 dark:hover:bg-slate-900">
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{engine.engine_name}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{engine.result || 'N/A'}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${engine.category === 'malicious'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                : engine.category === 'undetected'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                }`}>{engine.category}</span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{engine.engine_update}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -142,10 +159,7 @@ function Quicksand({ state, results }) {
     // }
     
     return (
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
-            <caption className="px-4 py-2 text-left text-lg font-semibold text-gray-900 dark:text-gray-100">
-                RESULTADO DE QUICKSAND
-            </caption>
+    <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
             
             <thead className="bg-gray-50 dark:bg-slate-900 sticky top-0">
                 <tr>
@@ -168,53 +182,72 @@ function Quicksand({ state, results }) {
             <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-800">
                 {/* 3. Mapeo del objeto de resultados */}
         {Object.entries(results).map(([filePath, data]) => {
-          // Aseguramos que 'data' sea un objeto para evitar errores si la estructura cambia
-          if (data === null || typeof data !== 'object') {
+          // Caso 1: data es un array (lista de detecciones YARA). Es el formato actual usado por el resto del código.
+          if (Array.isArray(data)) {
+            const detections = data;
+            const score = detections.length; // métrica simple: número de coincidencias
+            // Generar tags a partir de los nombres de regla únicos
+            const tags = Array.from(new Set(detections.map(d => d.rule || d.tag).filter(Boolean)));
+
+            // Si alguna detección posee un campo 'severity' o 'score', podemos intentar usarlo; de lo contrario, heurística basada en la cantidad
+            let derivedRisk = 'none';
+            if (score > 0 && score < 3) derivedRisk = 'low';
+            else if (score >= 3 && score < 6) derivedRisk = 'medium';
+            else if (score >= 6) derivedRisk = 'high';
+
+            // Si alguna detección trae severidad explícita, elevamos el riesgo
+            const hasHigh = detections.some(d => /high|critical/i.test(String(d.severity || '')));
+            const hasMedium = detections.some(d => /med/i.test(String(d.severity || '')));
+            if (hasHigh) derivedRisk = 'high'; else if (hasMedium && derivedRisk === 'low') derivedRisk = 'medium';
+
+            const badgeColor =
+              derivedRisk === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+              derivedRisk === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+              derivedRisk === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+
             return (
               <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{filePath}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" colSpan={3}>Formato de dato inesperado</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                  <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeColor}`}>
+                    {derivedRisk.toUpperCase()}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{score}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{tags.length ? tags.join(', ') : '—'}</td>
               </tr>
             );
           }
 
-          // Compatibilidad: algunos resultados podrían usar 'risk' en lugar de 'state'
-          const riskLevel = (data.state || data.risk || 'none').toLowerCase();
-          const badgeColor =
-            riskLevel === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
-            riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
-            riskLevel === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
-            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+          // Caso 2: data es un objeto (formato ideal con risk/score/tags directamente)
+          if (data && typeof data === 'object') {
+            const riskLevel = (data.state || data.risk || 'none').toLowerCase();
+            const badgeColor =
+              riskLevel === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+              riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+              riskLevel === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+            return (
+              <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
+                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{filePath}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                  <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeColor}`}>{riskLevel.toUpperCase()}</span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{data.score ?? '—'}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || '—')}</td>
+              </tr>
+            );
+          }
 
+          // Caso 3: formato inesperado
           return (
-                    <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
-                        
-                        {/* Celda RUTA / Flujo (la clave del objeto) */}
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {filePath}
-                        </td>
-                        
-                        {/* Celda RIESGO DETECTADO */}
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                            {/* Usamos un color basado en la propiedad 'risk' del resultado detallado */}
-              <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeColor}`}>
-                {riskLevel.toUpperCase()}
-              </span>
-                        </td>
-                        
-                        {/* Celda SCORE */}
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-              {data.score ?? '—'}
-                        </td>
-
-                        {/* Celda TAGS / CATEGORÍAS */}
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {/* Muestra las etiquetas separadas por coma, si existen */}
-              {Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || '—')}
-                        </td>
-                        
-          </tr>
-        );})}
+            <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
+              <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{filePath}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" colSpan={3}>Formato de dato inesperado</td>
+            </tr>
+          );
+        })}
             </tbody>
         </table>
     );
