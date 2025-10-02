@@ -47,6 +47,8 @@ export const validatePassword = (password) => {
         return "El campus contraseña  debe incluir al menos una letra minúscula.";
     if (!/[0-9]/.test(password))
         return "El campus contraseña  debe incluir al menos un número.";
+    if (!/[^A-Za-z0-9]/.test(password))
+        return "El campus contraseña  debe incluir al menos un carácter especial.";
     return null;
 };
 /**
@@ -70,7 +72,8 @@ export const validateRegistrationForm = (name ,email, password) => {
 export const validateSignInForm = ( email, password) => {
     const errors = {};
     errors.email = validateEmail(email);
-    errors.password = validatePassword(password);
+    // Validación ligera para login: sólo existencia y límites, no fuerza complejidad.
+    errors.password = validateLoginPassword(password);
     // Filtrar sólo errores reales
     const realErrors = Object.keys(errors).reduce((acc, key) => {
         if (errors[key]) acc[key] = errors[key];
@@ -78,4 +81,13 @@ export const validateSignInForm = ( email, password) => {
     }, {});
     // IMPORTANTE: retornar null si no hay errores para que el submit continúe
     return Object.keys(realErrors).length === 0 ? null : realErrors;
+};
+
+// Validación específica para inicio de sesión (no impone complejidad, sólo presencia y longitud)
+export const validateLoginPassword = (password) => {
+    if (!password || password.trim() === '')
+        return "El campus contraseña es obligatoria.";
+    if (password.length > NAME_PASSWORD_MAX)
+        return `El campus contraseña permite máximo ${NAME_PASSWORD_MAX} caracteres.`;
+    return null;
 };
