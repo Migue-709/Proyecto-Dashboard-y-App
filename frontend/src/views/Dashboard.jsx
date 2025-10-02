@@ -127,12 +127,12 @@ function Dashboard({ setUser }) {
         );
         const state = response.data.analysis_results?.risk
         const results = response.data.analysis_results?.results
-        console.log(state,results)
+        console.log(state, results)
         setQuicksand({
-        state: response.data.analysis_results?.risk,
-        results : response.data.analysis_results?.results
+          state: response.data.analysis_results?.risk,
+          results: response.data.analysis_results?.results
         });
-        console.log('ESTATUS DE QUICKSAND: ',state, "RESULTADOS:", results)
+        console.log('ESTATUS DE QUICKSAND: ', state, "RESULTADOS:", results)
       } catch (error) {
         if (error.response) {
           console.error("Error en la API de QuickSand:", error.response.data);
@@ -334,13 +334,36 @@ function Dashboard({ setUser }) {
     const maliciousDetections = lastResults
       ? Object.values(lastResults).filter(r => r.category === 'malicious')
       : [];
+    console.log('DESPUES DE QUICKSAND')
     if (maliciousDetections.length > 0)
       try {
         console.log("VENDOR WARNING:");
-        const newRows = maliciousDetections.map(target => ({
+
+        // 1. Procesar maliciousDetections (VirusTotal)
+        const virusTotalRows = maliciousDetections.map(target => ({
           vendor_name: target.engine_name,
           warning_message: target.result
         }));
+
+        // 2. Procesar quicksand.results (detecciones por flujo/stream)
+        const quicksandRows = Object.entries(quicksandResults).flatMap(([flowName, detectionsArray]) => {
+          // flowName es la clave (ej: "root", "root-stream-Macros-VBA-ThisDocument")
+          // detectionsArray es el array de objetos de detección de YARA que quieres mapear
+
+          // Mapeamos el array interno de detecciones.
+          return detectionsArray.map(detection => ({
+            // Usamos la propiedad 'rule' como vendor_name
+            vendor_name: detection.rule,
+            // Usamos la propiedad 'desc' como warning_message
+            warning_message: detection.desc,
+          }));
+        });
+
+        // 3. Combinar ambos arrays
+        const newRows = [
+          ...virusTotalRows,
+          ...quicksandRows
+        ];
         // Guardar advertencias en la base de datos
         const response = await fetch('http://localhost:3001/api/warnings', {
           method: 'POST',

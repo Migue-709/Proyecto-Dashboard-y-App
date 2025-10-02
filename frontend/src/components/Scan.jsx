@@ -108,8 +108,6 @@ function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
     </div>
   )
 }
-import React from 'react';
-
 // Se asume que Quicksand recibe 'state' (el riesgo general) y 'results' (el objeto de resultados detallados)
 function Quicksand({ state, results }) {
     
@@ -179,13 +177,13 @@ function Quicksand({ state, results }) {
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                             {/* Usamos un color basado en la propiedad 'risk' del resultado detallado */}
                             <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                ${data.risk === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
-                                 data.risk === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
-                                 data.risk === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                                ${data.state === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+                                 data.state === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+                                 data.state === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
                                  'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                                 }`}
                             >
-                                {data.risk.toUpperCase()}
+                                {data.stater.toUpperCase()}
                             </span>
                         </td>
                         
