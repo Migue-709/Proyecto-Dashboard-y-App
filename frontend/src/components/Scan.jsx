@@ -49,6 +49,9 @@ function Scan({ file, maliciousCount, analysisResult, isScanning }) {
         ) : (
           <div className="overflow-hidden flex flex-col ma-h-full  md:max-h-[300px] lg:max-h-[350px]">
             <div className="overflow-y-auto flex-grow">
+              <div className="">
+                <span>RESULTADO DE QUICKSAND</span>
+              </div>
               <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
                 <thead className="bg-gray-50 dark:bg-slate-900 sticky top-0">
                   <tr>
