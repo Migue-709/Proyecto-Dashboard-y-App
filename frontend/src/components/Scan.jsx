@@ -49,7 +49,8 @@ function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
         ) : (
           <div className="overflow-hidden flex flex-col ma-h-full  md:max-h-[250px]">
             <div className="flex-grow">
-              <Quicksand state={quicksand.state} results={Object.keys(quicksand.results)}/>
+              {/* Pasar el objeto completo de resultados de QuickSand (no solo sus keys) */}
+              <Quicksand state={quicksand.state} results={quicksand.results} />
 
 <div className="overflow-x-auto border border-gray-200 dark:border-slate-800 rounded-lg shadow-md max-h-80">
               <table className=" min-w-full divide-y divide-gray-200 dark:divide-slate-800">
@@ -166,7 +167,26 @@ function Quicksand({ state, results }) {
             {/* El Tbody va DESPUÉS del Thead */}
             <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-800">
                 {/* 3. Mapeo del objeto de resultados */}
-                {Object.entries(results).map(([filePath, data]) => (
+        {Object.entries(results).map(([filePath, data]) => {
+          // Aseguramos que 'data' sea un objeto para evitar errores si la estructura cambia
+          if (data === null || typeof data !== 'object') {
+            return (
+              <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
+                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{filePath}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" colSpan={3}>Formato de dato inesperado</td>
+              </tr>
+            );
+          }
+
+          // Compatibilidad: algunos resultados podrían usar 'risk' en lugar de 'state'
+          const riskLevel = (data.state || data.risk || 'none').toLowerCase();
+          const badgeColor =
+            riskLevel === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+            riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+            riskLevel === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+
+          return (
                     <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
                         
                         {/* Celda RUTA / Flujo (la clave del objeto) */}
@@ -177,30 +197,24 @@ function Quicksand({ state, results }) {
                         {/* Celda RIESGO DETECTADO */}
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
                             {/* Usamos un color basado en la propiedad 'risk' del resultado detallado */}
-                            <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                ${data.state === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
-                                 data.state === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
-                                 data.state === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
-                                 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                }`}
-                            >
-                                {data.stater.toUpperCase()}
-                            </span>
+              <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badgeColor}`}>
+                {riskLevel.toUpperCase()}
+              </span>
                         </td>
                         
                         {/* Celda SCORE */}
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {data.score}
+              {data.score ?? '—'}
                         </td>
 
                         {/* Celda TAGS / CATEGORÍAS */}
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {/* Muestra las etiquetas separadas por coma, si existen */}
-                            {data.tags && data.tags.join(', ')}
+              {Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || '—')}
                         </td>
                         
-                    </tr>
-                ))}
+          </tr>
+        );})}
             </tbody>
         </table>
     );
