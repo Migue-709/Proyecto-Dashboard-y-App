@@ -1,5 +1,5 @@
 import Gemini from "./Gemini";
-function Scan({ file, maliciousCount, analysisResult, isScanning }) {
+function Scan({ file, maliciousCount, analysisResult, isScanning, quicksand }) {
   return (
     <div className="flex flex-col gap-6  h-full">
       {/* Sección de Resultados (Placeholder) */}
@@ -7,7 +7,7 @@ function Scan({ file, maliciousCount, analysisResult, isScanning }) {
       <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm flex flex-col border border-gray-200 dark:border-slate-800 overflow-hidden flex-grow">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Resultados del análisis</h3>
-            <Gemini></Gemini>
+          <Gemini></Gemini>
           {analysisResult && (
             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${maliciousCount > 0
               ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
@@ -49,10 +49,13 @@ function Scan({ file, maliciousCount, analysisResult, isScanning }) {
         ) : (
           <div className="overflow-hidden flex flex-col ma-h-full  md:max-h-[300px] lg:max-h-[350px]">
             <div className="overflow-y-auto flex-grow">
-              <div className="">
-                <span>RESULTADO DE QUICKSAND</span>
-              </div>
+              <Quicksand state={quicksand.state} results={Object.keys(quicksand.results)}/>
+
+
               <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+                <caption className="px-4 py-2  text-lg font-semibold text-gray-900 dark:text-gray-100 uppercase w-full text-center">
+                  RESULTADO DE VIRUSTOTAL
+                </caption>
                 <thead className="bg-gray-50 dark:bg-slate-900 sticky top-0">
                   <tr>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -105,4 +108,104 @@ function Scan({ file, maliciousCount, analysisResult, isScanning }) {
     </div>
   )
 }
+import React from 'react';
+
+// Se asume que Quicksand recibe 'state' (el riesgo general) y 'results' (el objeto de resultados detallados)
+function Quicksand({ state, results }) {
+    
+    // 1. Validar si el objeto 'results' existe y está vacío.
+    const hasResults = results && Object.keys(results).length > 0;
+
+    // 2. Si QuickSand no encuentra nada, el objeto 'results' puede ser {}. 
+    //    Si la API devuelve un resultado vacío, 'results' podría ser null.
+    if (!hasResults) {
+        return (
+            // Mensaje de "vacío" o "sin resultados"
+            <div className="w-full">
+                <p className="px-4 py-3 text-center text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    RESULTADO DE QUICKSAND
+                </p>
+                <p className="text-center py-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-900 rounded-lg m-2">
+                    ✅ Análisis completado. No se encontraron indicadores de riesgo detallados en el documento.
+                </p>
+            </div>
+        );
+    }
+
+    // Si hay resultados, renderiza la tabla.
+    // Usaremos Object.entries() para obtener [clave, valor] y mapear los resultados.
+    
+    // NOTA: QuickSand puede devolver un objeto como este:
+    // {
+    //   'archivo.doc': { risk: 'low', tags: ['vba', 'ole'], score: 5 },
+    //   'flujo_0': { risk: 'none', tags: [], score: 0 }
+    // }
+    
+    return (
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+            <caption className="px-4 py-2 text-left text-lg font-semibold text-gray-900 dark:text-gray-100">
+                RESULTADO DE QUICKSAND
+            </caption>
+            
+            <thead className="bg-gray-50 dark:bg-slate-900 sticky top-0">
+                <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Ruta / Flujo
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Riesgo Detectado
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Puntuación (Score)
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Tags / Categorías
+                    </th>
+                </tr>
+            </thead>
+            
+            {/* El Tbody va DESPUÉS del Thead */}
+            <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-800">
+                {/* 3. Mapeo del objeto de resultados */}
+                {Object.entries(results).map(([filePath, data]) => (
+                    <tr key={filePath} className="hover:bg-gray-50 dark:hover:bg-slate-900">
+                        
+                        {/* Celda RUTA / Flujo (la clave del objeto) */}
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {filePath}
+                        </td>
+                        
+                        {/* Celda RIESGO DETECTADO */}
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            {/* Usamos un color basado en la propiedad 'risk' del resultado detallado */}
+                            <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                ${data.risk === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' :
+                                 data.risk === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+                                 data.risk === 'low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                                 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                }`}
+                            >
+                                {data.risk.toUpperCase()}
+                            </span>
+                        </td>
+                        
+                        {/* Celda SCORE */}
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            {data.score}
+                        </td>
+
+                        {/* Celda TAGS / CATEGORÍAS */}
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            {/* Muestra las etiquetas separadas por coma, si existen */}
+                            {data.tags && data.tags.join(', ')}
+                        </td>
+                        
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    );
+}
+
+// export default Quicksand; // Descomenta si usas export default
 export default Scan

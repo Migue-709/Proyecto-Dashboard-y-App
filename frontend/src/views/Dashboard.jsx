@@ -78,6 +78,7 @@ function Dashboard({ setUser }) {
   const [isScanning, setIsScanning] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Nuevo estado para el menú móvil
+  const [quicksand, setQuicksand] = useState({ state: null, results: null });
   const [msgError, setMsgError] = useState({
     msg: null,
     state: false,
@@ -124,12 +125,14 @@ function Dashboard({ setUser }) {
             }
           }
         );
-
-        console.log("Análisis QuickSand completado:", response.data);
-        const a =  response.data.analysis_results?.results
-        const risk = response.data.analysis_results?.risk
-        console.log('RESULTADO DE RESULTS',a)
-        console.log('ESTADO DE QUICKSAND:', risk)
+        const state = response.data.analysis_results?.risk
+        const results = response.data.analysis_results?.results
+        console.log(state,results)
+        setQuicksand({
+        state: response.data.analysis_results?.risk,
+        results : response.data.analysis_results?.results
+        });
+        console.log('ESTATUS DE QUICKSAND: ',state, "RESULTADOS:", results)
       } catch (error) {
         if (error.response) {
           console.error("Error en la API de QuickSand:", error.response.data);
@@ -592,7 +595,7 @@ function Dashboard({ setUser }) {
               </label>
             </div>
           )}
-          {selectNavbar == 0 && <Scan file={file} maliciousCount={maliciousCount} totalAnalyzers={totalAnalyzers} analysisResult={analysisResult} isScanning={isScanning} scanFile={scanFile} handleEmptyFile={handleEmptyFile}></Scan>}
+          {selectNavbar == 0 && <Scan file={file} maliciousCount={maliciousCount} totalAnalyzers={totalAnalyzers} analysisResult={analysisResult} isScanning={isScanning} scanFile={scanFile} handleEmptyFile={handleEmptyFile} quicksand={quicksand}></Scan>}
           {selectNavbar == 1 && <ARV_extractor file={file} />}
           {selectNavbar == 2 && <History />}
 
