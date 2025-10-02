@@ -344,6 +344,7 @@ function Dashboard({ setUser }) {
           vendor_name: target.engine_name,
           warning_message: target.result
         }));
+        const quicksandResults = quicksand.results || {};
 
         // 2. Procesar quicksand.results (detecciones por flujo/stream)
         const quicksandRows = Object.entries(quicksandResults).flatMap(([flowName, detectionsArray]) => {
